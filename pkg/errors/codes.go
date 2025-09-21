@@ -13,19 +13,28 @@ const (
 
 // Codes DB
 const (
+	CodeDBError    = "DB_ERROR"
 	CodeDBNotFound = "DB_NOT_FOUND"
 	CodeDBConflict = "DB_CONFLICT"
-	CodeDBError    = "DB_ERROR"
 )
 
-// Codes OpenStack
+// Codes OpenStack - Keystone
 const (
 	CodeKeystoneAuthFailed   = "KEYSTONE_AUTH_FAILED"
-	CodeKeystoneUnauthorized = "KEYSTONE_UNAUTHORIZED"
+	CodeKeystoneTokenInvalid = "KEYSTONE_TOKEN_INVALID"
+	CodeKeystoneForbidden    = "KEYSTONE_FORBIDDEN"
+)
 
-	CodeNovaQuotaExceeded = "NOVA_QUOTA_EXCEEDED"
-	CodeNovaInstanceError = "NOVA_INSTANCE_ERROR"
+// Codes OpenStack - Nova
+const (
+	CodeNovaError       = "NOVA_ERROR"
+	CodeNovaNotFound    = "NOVA_NOT_FOUND"
+	CodeNovaQuotaExceed = "NOVA_QUOTA_EXCEEDED"
+)
 
-	CodeNeutronIPConflict   = "NEUTRON_IP_CONFLICT"
-	CodeNeutronNetworkError = "NEUTRON_NETWORK_ERROR"
+// Codes OpenStack - Neutron
+const (
+	CodeNeutronError      = "NEUTRON_ERROR"
+	CodeNeutronNotFound   = "NEUTRON_NOT_FOUND"
+	CodeNeutronIPConflict = "NEUTRON_IP_CONFLICT"
 )

@@ -2,24 +2,33 @@ package errors
 
 // Keystone
 func NewKeystoneAuthFailed(cause error) *Error {
-	return Wrap(CodeKeystoneAuthFailed, "Authentication with Keystone failed", cause)
+	return Wrap(cause, CodeKeystoneAuthFailed, "keystone authentication failed")
 }
-func NewKeystoneUnauthorized() *Error {
-	return New(CodeKeystoneUnauthorized, "Unauthorized request to Keystone")
+func NewKeystoneTokenInvalid() *Error {
+	return New(CodeKeystoneTokenInvalid, "invalid Keystone token")
+}
+func NewKeystoneForbidden() *Error {
+	return New(CodeKeystoneForbidden, "forbidden Keystone request")
 }
 
 // Nova
-func NewNovaQuotaExceeded(cause error) *Error {
-	return Wrap(CodeNovaQuotaExceeded, "Nova quota exceeded", cause)
+func NewNovaError(cause error) *Error {
+	return Wrap(cause, CodeNovaError, "nova API error")
 }
-func NewNovaInstanceError(cause error) *Error {
-	return Wrap(CodeNovaInstanceError, "Nova instance operation failed", cause)
+func NewNovaNotFound(resource string) *Error {
+	return Newf(CodeNovaNotFound, "nova resource not found: %s", resource)
+}
+func NewNovaQuotaExceeded(resource string) *Error {
+	return Newf(CodeNovaQuotaExceed, "nova quota exceeded for %s", resource)
 }
 
 // Neutron
-func NewNeutronIPConflict(cause error) *Error {
-	return Wrap(CodeNeutronIPConflict, "Neutron IP address conflict", cause)
+func NewNeutronError(cause error) *Error {
+	return Wrap(cause, CodeNeutronError, "neutron API error")
 }
-func NewNeutronNetworkError(cause error) *Error {
-	return Wrap(CodeNeutronNetworkError, "Neutron network operation failed", cause)
+func NewNeutronNotFound(resource string) *Error {
+	return Newf(CodeNeutronNotFound, "neutron resource not found: %s", resource)
+}
+func NewNeutronIPConflict(ip string) *Error {
+	return Newf(CodeNeutronIPConflict, "neutron IP conflict: %s", ip)
 }

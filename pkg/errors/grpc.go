@@ -1,29 +1,29 @@
 package errors
 
 import (
-	"errors"
+	sterrors "errors"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-// ToGRPCError convertit une erreur en gRPC status.Error
+// convertit une erreur en gRPC status.Error
 func ToGRPCError(err error) error {
 	var e *Error
-	if errors.As(err, &e) {
+	if sterrors.As(err, &e) {
 		return status.Error(mapCodeToGRPCStatus(e.Code), e.Message)
 	}
-	return status.Error(codes.Internal, "Internal server error")
+	return status.Error(codes.Internal, "internal server error")
 }
 
-// mapCodeToGRPCStatus mappe nos codes vers des status gRPC
+// mappe nos codes vers des status gRPC
 func mapCodeToGRPCStatus(code string) codes.Code {
 	switch code {
-	case CodeUnauthorized, CodeKeystoneUnauthorized:
+	case CodeUnauthorized, CodeKeystoneAuthFailed, CodeKeystoneTokenInvalid:
 		return codes.Unauthenticated
-	case CodeForbidden:
+	case CodeForbidden, CodeKeystoneForbidden:
 		return codes.PermissionDenied
-	case CodeNotFound, CodeDBNotFound:
+	case CodeNotFound, CodeDBNotFound, CodeNovaNotFound, CodeNeutronNotFound:
 		return codes.NotFound
 	case CodeConflict, CodeDBConflict, CodeNeutronIPConflict:
 		return codes.AlreadyExists

@@ -5,9 +5,9 @@ func NewDBNotFound(entity string) *Error {
 }
 
 func NewDBConflict(entity string) *Error {
-	return Newf(CodeDBConflict, "Conflict detected on %s", entity)
+	return Newf(CodeDBConflict, "conflict detected on %s", entity)
 }
 
 func NewDBError(cause error) *Error {
-	return Wrap(CodeDBError, "Database error", cause)
+	return Wrap(cause, CodeDBError, "database error")
 }

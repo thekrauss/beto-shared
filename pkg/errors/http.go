@@ -14,7 +14,6 @@ type HTTPErrorResponse struct {
 
 // convertit une erreur en (statusCode, body JSON)
 func ToHTTPError(err error) (int, []byte) {
-
 	var e *Error
 	if sterrors.As(err, &e) {
 		status := mapCodeToHTTPStatus(e.Code)
@@ -29,7 +28,7 @@ func ToHTTPError(err error) (int, []byte) {
 	// fallback si erreur inconnue
 	resp := HTTPErrorResponse{
 		Code:    CodeInternal,
-		Message: "Internal server error",
+		Message: "internal server error",
 	}
 	body, _ := json.Marshal(resp)
 	return http.StatusInternalServerError, body
@@ -38,11 +37,11 @@ func ToHTTPError(err error) (int, []byte) {
 // mappe nos codes vers des status HTTP
 func mapCodeToHTTPStatus(code string) int {
 	switch code {
-	case CodeUnauthorized, CodeKeystoneUnauthorized:
+	case CodeUnauthorized, CodeKeystoneAuthFailed, CodeKeystoneTokenInvalid:
 		return http.StatusUnauthorized
-	case CodeForbidden:
+	case CodeForbidden, CodeKeystoneForbidden:
 		return http.StatusForbidden
-	case CodeNotFound, CodeDBNotFound:
+	case CodeNotFound, CodeDBNotFound, CodeNovaNotFound, CodeNeutronNotFound:
 		return http.StatusNotFound
 	case CodeConflict, CodeDBConflict, CodeNeutronIPConflict:
 		return http.StatusConflict
