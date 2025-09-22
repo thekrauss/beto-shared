@@ -2,80 +2,94 @@ package openstack
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/thekrauss/beto-shared/pkg/errors"
 )
 
+// Client Neutron
 type NeutronClient struct {
-	Endpoint string
-	Token    string
+	client *gophercloud.ServiceClient
 }
 
-func NewNeutronClient(endpoint, token string) *NeutronClient {
-	return &NeutronClient{Endpoint: endpoint, Token: token}
+// initialise le client Neutron
+func NewNeutronClient(provider *gophercloud.ProviderClient, region string) (*NeutronClient, error) {
+	client, err := openstack.NewNetworkV2(provider, gophercloud.EndpointOpts{
+		Region: region,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, errors.CodeNeutronError, "failed to init Neutron client")
+	}
+	return &NeutronClient{client: client}, nil
 }
 
+// CRUD Réseaux
 type Network struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-type CreateNetworkRequest struct {
-	Network struct {
-		Name string `json:"name"`
-	} `json:"network"`
+	ID   string
+	Name string
 }
 
 // crée un réseau
-func (c *NeutronClient) CreateNetwork(ctx context.Context, req CreateNetworkRequest) (*Network, error) {
-	url := fmt.Sprintf("%s/v2.0/networks", c.Endpoint)
-	var resp struct {
-		Network Network `json:"network"`
+func (c *NeutronClient) CreateNetwork(ctx context.Context, name string) (*Network, error) {
+	createOpts := networks.CreateOpts{
+		Name:         name,
+		AdminStateUp: gophercloud.Enabled,
 	}
-	if err := doRequest(ctx, "POST", url, c.Token, req, &resp); err != nil {
+
+	n, err := networks.Create(c.client, createOpts).Extract()
+	if err != nil {
 		return nil, errors.Wrap(err, errors.CodeNeutronError, "failed to create network")
 	}
-	return &resp.Network, nil
+
+	return &Network{ID: n.ID, Name: n.Name}, nil
 }
 
-// liste les réseaux
+// liste tous les réseaux
 func (c *NeutronClient) ListNetworks(ctx context.Context) ([]Network, error) {
-	url := fmt.Sprintf("%s/v2.0/networks", c.Endpoint)
-	var resp struct {
-		Networks []Network `json:"networks"`
-	}
-	if err := doRequest(ctx, "GET", url, c.Token, nil, &resp); err != nil {
+	allPages, err := networks.List(c.client, networks.ListOpts{}).AllPages()
+	if err != nil {
 		return nil, errors.Wrap(err, errors.CodeNeutronError, "failed to list networks")
 	}
-	return resp.Networks, nil
+
+	nList, err := networks.ExtractNetworks(allPages)
+	if err != nil {
+		return nil, errors.Wrap(err, errors.CodeNeutronError, "failed to parse networks")
+	}
+
+	var result []Network
+	for _, n := range nList {
+		result = append(result, Network{ID: n.ID, Name: n.Name})
+	}
+	return result, nil
 }
+
+// Floating IPs
 
 // réserve une IP flottante
 func (c *NeutronClient) AllocateFloatingIP(ctx context.Context, networkID string) (string, error) {
-	url := fmt.Sprintf("%s/v2.0/floatingips", c.Endpoint)
-	body := map[string]any{
-		"floatingip": map[string]string{"floating_network_id": networkID},
+	createOpts := floatingips.CreateOpts{
+		FloatingNetworkID: networkID,
 	}
-	var resp struct {
-		FloatingIP struct {
-			ID        string `json:"id"`
-			IPAddress string `json:"floating_ip_address"`
-		} `json:"floatingip"`
-	}
-	if err := doRequest(ctx, "POST", url, c.Token, body, &resp); err != nil {
+
+	fip, err := floatingips.Create(c.client, createOpts).Extract()
+	if err != nil {
 		return "", errors.Wrap(err, errors.CodeNeutronError, "failed to allocate floating IP")
 	}
-	return resp.FloatingIP.IPAddress, nil
+
+	return fip.FloatingIP, nil
 }
 
-// associe une IP flottante à une VM (port)
+// associe une IP flottante à un port (VM)
 func (c *NeutronClient) AttachFloatingIP(ctx context.Context, floatingIPID, portID string) error {
-	url := fmt.Sprintf("%s/v2.0/floatingips/%s", c.Endpoint, floatingIPID)
-	body := map[string]any{
-		"floatingip": map[string]string{"port_id": portID},
+	updateOpts := floatingips.UpdateOpts{
+		PortID: &portID,
 	}
-	if err := doRequest(ctx, "PUT", url, c.Token, body, nil); err != nil {
+
+	_, err := floatingips.Update(c.client, floatingIPID, updateOpts).Extract()
+	if err != nil {
 		return errors.Wrap(err, errors.CodeNeutronError, "failed to attach floating IP")
 	}
 	return nil

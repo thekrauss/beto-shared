@@ -2,63 +2,83 @@ package openstack
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/startstop"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/pagination"
 	"github.com/thekrauss/beto-shared/pkg/errors"
 )
 
 type NovaClient struct {
-	Endpoint string
-	Token    string
+	client *gophercloud.ServiceClient
 }
 
-func NewNovaClient(endpoint, token string) *NovaClient {
-	return &NovaClient{Endpoint: endpoint, Token: token}
+// crée un client Nova basé sur ton Provider OpenStack
+func NewNovaClient(provider *gophercloud.ProviderClient, region string) (*NovaClient, error) {
+	client, err := openstack.NewComputeV2(provider, gophercloud.EndpointOpts{
+		Region: region,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, errors.CodeNovaError, "failed to init Nova client")
+	}
+	return &NovaClient{client: client}, nil
 }
 
 type Server struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-type CreateServerRequest struct {
-	Server struct {
-		Name      string                 `json:"name"`
-		ImageRef  string                 `json:"imageRef"`
-		FlavorRef string                 `json:"flavorRef"`
-		Networks  []map[string]string    `json:"networks"`
-		Metadata  map[string]interface{} `json:"metadata,omitempty"`
-	} `json:"server"`
+	ID   string
+	Name string
 }
 
 // crée une VM
-func (c *NovaClient) CreateVM(ctx context.Context, req CreateServerRequest) (*Server, error) {
-	url := fmt.Sprintf("%s/servers", c.Endpoint)
-	var resp struct {
-		Server Server `json:"server"`
+func (c *NovaClient) CreateVM(ctx context.Context, name, imageRef, flavorRef string, networkID string) (*Server, error) {
+	createOpts := servers.CreateOpts{
+		Name:      name,
+		ImageRef:  imageRef,
+		FlavorRef: flavorRef,
+		Networks: []servers.Network{
+			{UUID: networkID},
+		},
 	}
-	if err := doRequest(ctx, "POST", url, c.Token, req, &resp); err != nil {
+
+	s, err := servers.Create(c.client, createOpts).Extract()
+	if err != nil {
 		return nil, errors.Wrap(err, errors.CodeNovaError, "failed to create VM")
 	}
-	return &resp.Server, nil
+
+	return &Server{
+		ID:   s.ID,
+		Name: s.Name,
+	}, nil
 }
 
 // liste les VMs
 func (c *NovaClient) ListVMs(ctx context.Context) ([]Server, error) {
-	url := fmt.Sprintf("%s/servers/detail", c.Endpoint)
-	var resp struct {
-		Servers []Server `json:"servers"`
-	}
-	if err := doRequest(ctx, "GET", url, c.Token, nil, &resp); err != nil {
+	pager := servers.List(c.client, servers.ListOpts{})
+	var result []Server
+
+	err := pager.EachPage(func(page pagination.Page) (bool, error) {
+		sList, err := servers.ExtractServers(page)
+		if err != nil {
+			return false, err
+		}
+		for _, s := range sList {
+			result = append(result, Server{ID: s.ID, Name: s.Name})
+		}
+		return true, nil
+	})
+	if err != nil {
 		return nil, errors.Wrap(err, errors.CodeNovaError, "failed to list VMs")
 	}
-	return resp.Servers, nil
+
+	return result, nil
 }
 
 // supprime une VM
 func (c *NovaClient) DeleteVM(ctx context.Context, id string) error {
-	url := fmt.Sprintf("%s/servers/%s", c.Endpoint, id)
-	if err := doRequest(ctx, "DELETE", url, c.Token, nil, nil); err != nil {
+	err := servers.Delete(c.client, id).ExtractErr()
+	if err != nil {
 		return errors.Wrap(err, errors.CodeNovaError, "failed to delete VM")
 	}
 	return nil
@@ -66,9 +86,8 @@ func (c *NovaClient) DeleteVM(ctx context.Context, id string) error {
 
 // démarre une VM
 func (c *NovaClient) StartVM(ctx context.Context, id string) error {
-	url := fmt.Sprintf("%s/servers/%s/action", c.Endpoint, id)
-	body := map[string]any{"os-start": nil}
-	if err := doRequest(ctx, "POST", url, c.Token, body, nil); err != nil {
+	err := startstop.Start(c.client, id).ExtractErr()
+	if err != nil {
 		return errors.Wrap(err, errors.CodeNovaError, "failed to start VM")
 	}
 	return nil
@@ -76,9 +95,8 @@ func (c *NovaClient) StartVM(ctx context.Context, id string) error {
 
 // arrête une VM
 func (c *NovaClient) StopVM(ctx context.Context, id string) error {
-	url := fmt.Sprintf("%s/servers/%s/action", c.Endpoint, id)
-	body := map[string]any{"os-stop": nil}
-	if err := doRequest(ctx, "POST", url, c.Token, body, nil); err != nil {
+	err := startstop.Stop(c.client, id).ExtractErr()
+	if err != nil {
 		return errors.Wrap(err, errors.CodeNovaError, "failed to stop VM")
 	}
 	return nil

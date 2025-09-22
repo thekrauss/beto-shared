@@ -2,11 +2,11 @@ package authz
 
 import (
 	"context"
-	"fmt"
-	"net/http"
 
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/thekrauss/beto-shared/pkg/errors"
-	"github.com/thekrauss/beto-shared/pkg/openstack-client"
 )
 
 type Claims struct {
@@ -18,41 +18,38 @@ type Claims struct {
 }
 
 type KeystoneValidator struct {
-	Client *openstack.KeystoneClient
+	Provider *gophercloud.ProviderClient
 }
 
-// init avec client OpenStack
-func NewKeystoneValidator(client *openstack.KeystoneClient) *KeystoneValidator {
-	return &KeystoneValidator{Client: client}
+func NewKeystoneValidator(provider *gophercloud.ProviderClient) *KeystoneValidator {
+	return &KeystoneValidator{Provider: provider}
 }
 
-// appelle Keystone pour vérifier un token
 func (k *KeystoneValidator) ValidateToken(ctx context.Context, token string) (*Claims, error) {
-	url := fmt.Sprintf("%s/v3/auth/tokens", k.Client.AuthURL)
-
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	client, err := openstack.NewIdentityV3(k.Provider, gophercloud.EndpointOpts{})
 	if err != nil {
-		return nil, errors.Wrap(err, errors.CodeInternal, "failed to build keystone validation request")
+		return nil, errors.Wrap(err, errors.CodeKeystoneAuthFailed, "failed to init identity client")
 	}
-	req.Header.Set("X-Auth-Token", token)
-	req.Header.Set("X-Subject-Token", token)
 
-	resp, err := http.DefaultClient.Do(req)
+	result := tokens.Get(client, token)
+	_, err = result.ExtractToken()
 	if err != nil {
-		return nil, errors.Wrap(err, errors.CodeKeystoneAuthFailed, "keystone validation failed")
+		return nil, errors.Wrap(err, errors.CodeKeystoneTokenInvalid, "keystone token invalid")
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New(errors.CodeKeystoneTokenInvalid, "invalid Keystone token")
-	}
+	user, _ := result.ExtractUser()
+	project, _ := result.ExtractProject()
+	roles, _ := result.ExtractRoles()
 
 	claims := &Claims{
-		UserID:    "user-123",
-		UserName:  "demo",
-		ProjectID: "project-abc",
-		Project:   "demo-project",
-		Roles:     []string{"admin"},
+		UserID:    user.ID,
+		UserName:  user.Name,
+		ProjectID: project.ID,
+		Project:   project.Name,
 	}
+	for _, r := range roles {
+		claims.Roles = append(claims.Roles, r.Name)
+	}
+
 	return claims, nil
 }

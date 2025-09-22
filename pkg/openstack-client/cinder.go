@@ -2,87 +2,111 @@ package openstack
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 	"github.com/thekrauss/beto-shared/pkg/errors"
 )
 
 type CinderClient struct {
-	Endpoint string
-	Token    string
+	client *gophercloud.ServiceClient
 }
 
-func NewCinderClient(endpoint, token string) *CinderClient {
-	return &CinderClient{Endpoint: endpoint, Token: token}
+// initialise un client Cinder (Block Storage)
+func NewCinderClient(provider *gophercloud.ProviderClient, region string) (*CinderClient, error) {
+	client, err := openstack.NewBlockStorageV3(provider, gophercloud.EndpointOpts{
+		Region: region,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, errors.CodeInternal, "failed to init Cinder client")
+	}
+	return &CinderClient{client: client}, nil
 }
 
 type Volume struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Size        int    `json:"size"` // en Go
-	Description string `json:"description"`
-	Status      string `json:"status"`
+	ID          string
+	Name        string
+	Size        int
+	Description string
+	Status      string
 }
 
 // crée un volume
 func (c *CinderClient) CreateVolume(ctx context.Context, name string, sizeGB int, desc string) (*Volume, error) {
-	url := fmt.Sprintf("%s/volumes", c.Endpoint)
-	body := map[string]any{
-		"volume": map[string]any{
-			"name":        name,
-			"size":        sizeGB,
-			"description": desc,
-		},
+	createOpts := volumes.CreateOpts{
+		Name:        name,
+		Size:        sizeGB,
+		Description: desc,
 	}
-	var resp struct {
-		Volume Volume `json:"volume"`
-	}
-	if err := doRequest(ctx, "POST", url, c.Token, body, &resp); err != nil {
+
+	v, err := volumes.Create(c.client, createOpts).Extract()
+	if err != nil {
 		return nil, errors.Wrap(err, errors.CodeInternal, "failed to create volume")
 	}
-	return &resp.Volume, nil
+
+	return &Volume{
+		ID:          v.ID,
+		Name:        v.Name,
+		Size:        v.Size,
+		Description: v.Description,
+		Status:      v.Status,
+	}, nil
 }
 
 // liste les volumes
 func (c *CinderClient) ListVolumes(ctx context.Context) ([]Volume, error) {
-	url := fmt.Sprintf("%s/volumes/detail", c.Endpoint)
-	var resp struct {
-		Volumes []Volume `json:"volumes"`
-	}
-	if err := doRequest(ctx, "GET", url, c.Token, nil, &resp); err != nil {
+	allPages, err := volumes.List(c.client, volumes.ListOpts{}).AllPages()
+	if err != nil {
 		return nil, errors.Wrap(err, errors.CodeInternal, "failed to list volumes")
 	}
-	return resp.Volumes, nil
+
+	vList, err := volumes.ExtractVolumes(allPages)
+	if err != nil {
+		return nil, errors.Wrap(err, errors.CodeInternal, "failed to parse volumes")
+	}
+
+	var result []Volume
+	for _, v := range vList {
+		result = append(result, Volume{
+			ID:          v.ID,
+			Name:        v.Name,
+			Size:        v.Size,
+			Description: v.Description,
+			Status:      v.Status,
+		})
+	}
+	return result, nil
 }
 
 // supprime un volume
 func (c *CinderClient) DeleteVolume(ctx context.Context, id string) error {
-	url := fmt.Sprintf("%s/volumes/%s", c.Endpoint, id)
-	if err := doRequest(ctx, "DELETE", url, c.Token, nil, nil); err != nil {
-		return errors.Wrap(err, errors.CodeInternal, "failed to delete volume")
+	res := volumes.Delete(c.client, id, volumes.DeleteOpts{})
+	if res.Err != nil {
+		return errors.Wrap(res.Err, errors.CodeInternal, "failed to delete volume")
 	}
 	return nil
 }
 
 // attache un volume à une VM
-func (c *CinderClient) AttachVolume(ctx context.Context, serverID, volumeID, device string) error {
-	url := fmt.Sprintf("%s/servers/%s/os-volume_attachments", c.Endpoint, serverID)
-	body := map[string]any{
-		"volumeAttachment": map[string]any{
-			"volumeId": volumeID,
-			"device":   device, // ex: "/dev/vdb"
-		},
+func AttachVolume(ctx context.Context, computeClient *gophercloud.ServiceClient, serverID, volumeID, device string) error {
+	attachOpts := volumeattach.CreateOpts{
+		VolumeID: volumeID,
+		Device:   device, // ex: "/dev/vdb"
 	}
-	if err := doRequest(ctx, "POST", url, c.Token, body, nil); err != nil {
+
+	_, err := volumeattach.Create(computeClient, serverID, attachOpts).Extract()
+	if err != nil {
 		return errors.Wrap(err, errors.CodeInternal, "failed to attach volume")
 	}
 	return nil
 }
 
 // détache un volume d’une VM
-func (c *CinderClient) DetachVolume(ctx context.Context, serverID, attachmentID string) error {
-	url := fmt.Sprintf("%s/servers/%s/os-volume_attachments/%s", c.Endpoint, serverID, attachmentID)
-	if err := doRequest(ctx, "DELETE", url, c.Token, nil, nil); err != nil {
+func DetachVolume(ctx context.Context, computeClient *gophercloud.ServiceClient, serverID, attachmentID string) error {
+	err := volumeattach.Delete(computeClient, serverID, attachmentID).ExtractErr()
+	if err != nil {
 		return errors.Wrap(err, errors.CodeInternal, "failed to detach volume")
 	}
 	return nil
