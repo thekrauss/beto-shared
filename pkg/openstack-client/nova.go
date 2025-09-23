@@ -15,7 +15,6 @@ type NovaClient struct {
 	client *gophercloud.ServiceClient
 }
 
-// crée un client Nova basé sur ton Provider OpenStack
 func NewNovaClient(provider *gophercloud.ProviderClient, region string) (*NovaClient, error) {
 	client, err := openstack.NewComputeV2(provider, gophercloud.EndpointOpts{
 		Region: region,
@@ -31,7 +30,6 @@ type Server struct {
 	Name string
 }
 
-// crée une VM
 func (c *NovaClient) CreateVM(ctx context.Context, name, imageRef, flavorRef string, networkID string) (*Server, error) {
 	createOpts := servers.CreateOpts{
 		Name:      name,
@@ -53,7 +51,6 @@ func (c *NovaClient) CreateVM(ctx context.Context, name, imageRef, flavorRef str
 	}, nil
 }
 
-// liste les VMs
 func (c *NovaClient) ListVMs(ctx context.Context) ([]Server, error) {
 	pager := servers.List(c.client, servers.ListOpts{})
 	var result []Server
@@ -75,7 +72,6 @@ func (c *NovaClient) ListVMs(ctx context.Context) ([]Server, error) {
 	return result, nil
 }
 
-// supprime une VM
 func (c *NovaClient) DeleteVM(ctx context.Context, id string) error {
 	err := servers.Delete(c.client, id).ExtractErr()
 	if err != nil {
@@ -84,7 +80,6 @@ func (c *NovaClient) DeleteVM(ctx context.Context, id string) error {
 	return nil
 }
 
-// démarre une VM
 func (c *NovaClient) StartVM(ctx context.Context, id string) error {
 	err := startstop.Start(c.client, id).ExtractErr()
 	if err != nil {
@@ -93,7 +88,6 @@ func (c *NovaClient) StartVM(ctx context.Context, id string) error {
 	return nil
 }
 
-// arrête une VM
 func (c *NovaClient) StopVM(ctx context.Context, id string) error {
 	err := startstop.Stop(c.client, id).ExtractErr()
 	if err != nil {

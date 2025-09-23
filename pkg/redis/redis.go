@@ -11,7 +11,6 @@ import (
 
 var Client *redis.Client
 
-// initialise la connexion Redis
 func Init(host string, port int, password string, db int) error {
 	addr := fmt.Sprintf("%s:%d", host, port)
 	Client = redis.NewClient(&redis.Options{

@@ -11,7 +11,7 @@ type responseRecorder struct {
 	statusCode int
 }
 
-// logge chaque requête HTTP avec méthode, path, durée, status
+// logs each HTTP request with method, path, duration, status
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()

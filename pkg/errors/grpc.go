@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// convertit une erreur en gRPC status.Error
+// converts an error to gRPC status.Error
 func ToGRPCError(err error) error {
 	var e *Error
 	if sterrors.As(err, &e) {
@@ -16,7 +16,7 @@ func ToGRPCError(err error) error {
 	return status.Error(codes.Internal, "internal server error")
 }
 
-// mappe nos codes vers des status gRPC
+// maps our codes to gRPC statuses
 func mapCodeToGRPCStatus(code string) codes.Code {
 	switch code {
 	case CodeUnauthorized, CodeKeystoneAuthFailed, CodeKeystoneTokenInvalid:

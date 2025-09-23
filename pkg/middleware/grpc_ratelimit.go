@@ -2,15 +2,15 @@ package middleware
 
 import (
 	"context"
-	"time"
 
+	"github.com/thekrauss/beto-shared/pkg/config"
 	"github.com/thekrauss/beto-shared/pkg/errors"
 	"github.com/thekrauss/beto-shared/pkg/redis"
 	"google.golang.org/grpc"
 )
 
-// applique un rate limit distribué via Redis
-func GRPCRateLimitInterceptor(keyFunc func(ctx context.Context, req interface{}) string, limit int, window time.Duration) grpc.UnaryServerInterceptor {
+// applies a rate limit distributed via Redis
+func GRPCRateLimitInterceptor(keyFunc func(ctx context.Context, req interface{}) string, cfg config.RateLimitConfig) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
 		req interface{},
@@ -19,7 +19,7 @@ func GRPCRateLimitInterceptor(keyFunc func(ctx context.Context, req interface{})
 	) (resp interface{}, err error) {
 		key := keyFunc(ctx, req)
 
-		allowed, rerr := redis.AllowRequest(ctx, key, limit, window)
+		allowed, rerr := redis.AllowRequest(ctx, key, cfg.Limit, cfg.Window)
 		if rerr != nil {
 			return nil, errors.ToGRPCError(errors.New(errors.CodeInternal, "rate limit check failed"))
 		}
@@ -32,5 +32,4 @@ func GRPCRateLimitInterceptor(keyFunc func(ctx context.Context, req interface{})
 }
 
 /*
-nexxt step chaque microservice doit lire ses limites depuis la config et applique automatiquement les middlewares
-*/
+ */

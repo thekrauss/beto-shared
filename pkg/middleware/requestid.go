@@ -11,7 +11,7 @@ type contextKey string
 
 const RequestIDKey contextKey = "request_id"
 
-// injecte un X-Request-ID (corrélation logs/traces)
+// injects an X-Request-ID (logs/traces correlation)
 func RequestIDMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reqID := r.Header.Get("X-Request-ID")

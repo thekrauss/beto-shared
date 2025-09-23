@@ -96,7 +96,7 @@ const (
 func Is(err error, code string) bool
 ```
 
-permet de comparer un code d’erreur
+allows you to compare an error code
 
 <a name="ToGRPCError"></a>
 ## func ToGRPCError
@@ -105,7 +105,7 @@ permet de comparer un code d’erreur
 func ToGRPCError(err error) error
 ```
 
-convertit une erreur en gRPC status.Error
+converts an error to gRPC status.Error
 
 <a name="ToHTTPError"></a>
 ## func ToHTTPError
@@ -125,7 +125,7 @@ convertit une erreur en \(statusCode, body JSON\)
 type Error struct {
     Code    string `json:"code"`
     Message string `json:"message"`
-    Cause   error  `json:"-"` // erreur technique interne
+    Cause   error  `json:"-"` //internal technical error
 }
 ```
 
@@ -136,7 +136,7 @@ type Error struct {
 func New(code string, message string) *Error
 ```
 
-crée une nouvelle erreur simple
+creates a new simple error
 
 <a name="NewDBConflict"></a>
 ### func NewDBConflict
@@ -253,7 +253,7 @@ func NewNovaQuotaExceeded(resource string) *Error
 func Newf(code string, format string, args ...any) *Error
 ```
 
-crée une nouvelle erreur avec message formaté
+creates a new error with formatted message
 
 <a name="Wrap"></a>
 ### func Wrap
@@ -262,7 +262,7 @@ crée une nouvelle erreur avec message formaté
 func Wrap(cause error, code string, message string) *Error
 ```
 
-enrobe une erreur existante
+coats an existing error
 
 <a name="Error.Error"></a>
 ### func \(\*Error\) Error
@@ -280,7 +280,7 @@ func (e *Error) Error() string
 func (e *Error) Unwrap() error
 ```
 
-compatibilité avec errors.Is / errors.As
+compatibility with errors.Is /errors.As
 
 <a name="HTTPErrorResponse"></a>
 ## type HTTPErrorResponse

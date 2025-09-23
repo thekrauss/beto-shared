@@ -9,7 +9,7 @@ import (
 	"github.com/thekrauss/beto-shared/pkg/errors"
 )
 
-// exécute des migrations à partir d’un chemin
+// runs migrations from a path
 func RunMigrations(sqlDB *sql.DB, driver, migrationsPath string) error {
 	var dbDriver string
 	switch driver {

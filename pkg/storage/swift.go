@@ -11,12 +11,10 @@ import (
 	"github.com/thekrauss/beto-shared/pkg/errors"
 )
 
-// implémente ObjectStorageBackend pour OpenStack Swift
 type SwiftClient struct {
 	client *gophercloud.ServiceClient
 }
 
-// initialise un client Swift (Object Storage V1)
 func NewSwiftClient(provider *gophercloud.ProviderClient, region string) (*SwiftClient, error) {
 	client, err := openstack.NewObjectStorageV1(provider, gophercloud.EndpointOpts{
 		Region: region,
@@ -27,7 +25,6 @@ func NewSwiftClient(provider *gophercloud.ProviderClient, region string) (*Swift
 	return &SwiftClient{client: client}, nil
 }
 
-// crée un "container" Swift (équivalent bucket)
 func (c *SwiftClient) CreateBucket(ctx context.Context, name string) error {
 	createOpts := containers.CreateOpts{}
 	res := containers.Create(c.client, name, createOpts)
@@ -37,7 +34,6 @@ func (c *SwiftClient) CreateBucket(ctx context.Context, name string) error {
 	return nil
 }
 
-// retourne la liste des objets dans un bucket
 func (c *SwiftClient) ListObjects(ctx context.Context, bucket string) ([]string, error) {
 	allPages, err := objects.List(c.client, bucket, objects.ListOpts{}).AllPages()
 	if err != nil {
@@ -52,7 +48,6 @@ func (c *SwiftClient) ListObjects(ctx context.Context, bucket string) ([]string,
 	return objList, nil
 }
 
-// charge un fichier dans un bucket
 func (c *SwiftClient) UploadObject(ctx context.Context, bucket, objectName string, content []byte) error {
 	createOpts := objects.CreateOpts{
 		Content: bytes.NewReader(content),
@@ -65,7 +60,6 @@ func (c *SwiftClient) UploadObject(ctx context.Context, bucket, objectName strin
 	return nil
 }
 
-// télécharge un objet depuis un bucket
 func (c *SwiftClient) DownloadObject(ctx context.Context, bucket, objectName string) ([]byte, error) {
 	res := objects.Download(c.client, bucket, objectName, nil)
 	data, err := res.ExtractContent()
@@ -75,7 +69,6 @@ func (c *SwiftClient) DownloadObject(ctx context.Context, bucket, objectName str
 	return data, nil
 }
 
-// supprime un objet dans un bucket
 func (c *SwiftClient) DeleteObject(ctx context.Context, bucket, objectName string) error {
 	res := objects.Delete(c.client, bucket, objectName, nil)
 	if res.Err != nil {

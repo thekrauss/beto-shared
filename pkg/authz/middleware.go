@@ -7,7 +7,7 @@ import (
 	"github.com/thekrauss/beto-shared/pkg/errors"
 )
 
-// KeystoneAuthMiddleware protège une route HTTP
+// protects an HTTP route
 func KeystoneAuthMiddleware(validator *KeystoneValidator, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")

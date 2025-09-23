@@ -14,7 +14,6 @@ type RabbitMQ struct {
 	channel *amqp091.Channel
 }
 
-// initialise la connexion RabbitMQ
 func InitRabbitMQ(url string) (*RabbitMQ, error) {
 	conn, err := amqp091.Dial(url)
 	if err != nil {
@@ -29,7 +28,6 @@ func InitRabbitMQ(url string) (*RabbitMQ, error) {
 	return &RabbitMQ{conn: conn, channel: ch}, nil
 }
 
-// envoie un message dans une exchange/topic
 func (r *RabbitMQ) Publish(exchange, routingKey string, body []byte) error {
 	if r.channel == nil {
 		return errors.New(errors.CodeInternal, "RabbitMQ channel is nil")

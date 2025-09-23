@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// la réponse JSON standardisée
+//  la réponse JSON standardisée
 type HTTPErrorResponse struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`

@@ -11,13 +11,13 @@ import (
 
 type MessageHandler func(ctx context.Context, msg amqp091.Delivery) error
 
-// Consume démarre un consumer générique avec retry/backoff, lié au context
+// Consume starts a generic consumer with retry/backoff, linked to the context
 func (r *RabbitMQ) Consume(ctx context.Context, queue string, handler MessageHandler) error {
 	if r.channel == nil {
 		return errors.New(errors.CodeInternal, "RabbitMQ channel is nil")
 	}
 
-	// Context attaché au consumer  permet shutdown propre
+	//Context attached to the consumer allows clean shutdown
 	msgs, err := r.channel.ConsumeWithContext(
 		ctx,
 		queue,
@@ -32,7 +32,7 @@ func (r *RabbitMQ) Consume(ctx context.Context, queue string, handler MessageHan
 		return errors.Wrap(err, errors.CodeInternal, "failed to register RabbitMQ consumer")
 	}
 
-	// Goroutine  lit jusqu’à ce que ctx soit annulé
+	//Gorutin reads until ctx is canceled
 	go func() {
 		for {
 			select {
@@ -46,7 +46,7 @@ func (r *RabbitMQ) Consume(ctx context.Context, queue string, handler MessageHan
 				}
 				if err := processWithRetry(ctx, handler, msg, 3); err != nil {
 					log.Printf("[RabbitMQ] failed after retries: %v", err)
-					_ = msg.Nack(false, false) // rejet définitif
+					_ = msg.Nack(false, false) //definitive rejection
 				} else {
 					_ = msg.Ack(false)
 				}
@@ -56,7 +56,7 @@ func (r *RabbitMQ) Consume(ctx context.Context, queue string, handler MessageHan
 	return nil
 }
 
-// applique une stratégie retry simple
+// applies a simple retry strategy
 func processWithRetry(ctx context.Context, handler MessageHandler, msg amqp091.Delivery, maxRetries int) error {
 	var err error
 	backoff := time.Second

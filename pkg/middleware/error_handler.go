@@ -6,7 +6,7 @@ import (
 	"github.com/thekrauss/beto-shared/pkg/errors"
 )
 
-// attrape les erreurs et renvoie un JSON unifié
+// catch errors and return a unified JSON
 func ErrorHandlerMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer func() {

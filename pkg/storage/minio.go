@@ -13,7 +13,7 @@ type MinIOBackend struct {
 	client *minio.Client
 }
 
-// initialise un client MinIO
+// client MinIO
 func NewMinIOBackend(endpoint, accessKey, secretKey string, useSSL bool) (*MinIOBackend, error) {
 	client, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
@@ -25,11 +25,10 @@ func NewMinIOBackend(endpoint, accessKey, secretKey string, useSSL bool) (*MinIO
 	return &MinIOBackend{client: client}, nil
 }
 
-// crée un "bucket"
+// create a bucket
 func (m *MinIOBackend) CreateBucket(ctx context.Context, name string) error {
 	err := m.client.MakeBucket(ctx, name, minio.MakeBucketOptions{})
-	if err != nil {
-		// bucket existe déjà ?
+	if err != nil { //bucket already exists?
 		exists, errBucketExists := m.client.BucketExists(ctx, name)
 		if errBucketExists == nil && exists {
 			return nil
@@ -39,7 +38,7 @@ func (m *MinIOBackend) CreateBucket(ctx context.Context, name string) error {
 	return nil
 }
 
-// liste les objets dans un bucket
+// lists items in a bucket
 func (m *MinIOBackend) ListObjects(ctx context.Context, bucket string) ([]string, error) {
 	var objs []string
 	for obj := range m.client.ListObjects(ctx, bucket, minio.ListObjectsOptions{Recursive: true}) {
@@ -51,7 +50,7 @@ func (m *MinIOBackend) ListObjects(ctx context.Context, bucket string) ([]string
 	return objs, nil
 }
 
-// envoie un objet
+// sends an object
 func (m *MinIOBackend) UploadObject(ctx context.Context, bucket, objectName string, content []byte) error {
 	_, err := m.client.PutObject(ctx, bucket, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 	if err != nil {
@@ -60,7 +59,7 @@ func (m *MinIOBackend) UploadObject(ctx context.Context, bucket, objectName stri
 	return nil
 }
 
-// télécharge un objet
+// download an object
 func (m *MinIOBackend) DownloadObject(ctx context.Context, bucket, objectName string) ([]byte, error) {
 	obj, err := m.client.GetObject(ctx, bucket, objectName, minio.GetObjectOptions{})
 	if err != nil {
@@ -75,7 +74,7 @@ func (m *MinIOBackend) DownloadObject(ctx context.Context, bucket, objectName st
 	return buf.Bytes(), nil
 }
 
-// supprime un objet
+// deletes an object
 func (m *MinIOBackend) DeleteObject(ctx context.Context, bucket, objectName string) error {
 	err := m.client.RemoveObject(ctx, bucket, objectName, minio.RemoveObjectOptions{})
 	if err != nil {

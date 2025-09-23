@@ -1,0 +1,52 @@
+service_name: "beto-identity"
+
+rate_limits:
+  beto-identity:
+    http:
+      enabled: true
+      limit: 100       
+      window: 1m      
+    grpc:
+      enabled: true
+      limit: 50       
+      window: 1m       
+
+  beto-compute:
+    http:
+      enabled: true
+      limit: 200       
+      window: 30s     
+    grpc:
+      enabled: false  
+      limit: 0
+      window: 0s
+
+  beto-storage:
+    http:
+      enabled: true
+      limit: 150       
+      window: 1m
+    grpc:
+      enabled: true
+      limit: 80
+      window: 1m
+
+  beto-network:
+    http:
+      enabled: true
+      limit: 120
+      window: 1m
+    grpc:
+      enabled: true
+      limit: 60
+      window: 1m
+
+  beto-billing:
+    http:
+      enabled: true
+      limit: 50        
+      window: 1m
+    grpc:
+      enabled: true
+      limit: 20
+      window: 1m

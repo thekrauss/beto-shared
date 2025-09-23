@@ -8,7 +8,7 @@ import (
 	"github.com/thekrauss/beto-shared/pkg/errors"
 )
 
-// retourne un middleware qui valide les tokens via Keystone
+// returns middleware that validates tokens via Keystone
 func AuthMiddleware(validator *authz.KeystoneValidator) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +32,7 @@ func AuthMiddleware(validator *authz.KeystoneValidator) func(http.Handler) http.
 				return
 			}
 
-			//  claims dans le context
+			//  claims in context
 			ctx := authz.WithClaims(r.Context(), claims)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

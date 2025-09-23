@@ -22,7 +22,6 @@ type Config struct {
 	LogLevel string // "silent", "error", "warn", "info"
 }
 
-// OpenDatabase ouvre une connexion DB (Postgres ou MySQL)
 func OpenDatabase(cfg Config) (*gorm.DB, error) {
 	var dialector gorm.Dialector
 	dsn := ""
@@ -46,7 +45,7 @@ func OpenDatabase(cfg Config) (*gorm.DB, error) {
 		return nil, errors.New(errors.CodeDBError, "unsupported database driver")
 	}
 
-	// log niveau configurable
+	//configurable log level
 	var gormLog logger.Interface
 	switch cfg.LogLevel {
 	case "info":

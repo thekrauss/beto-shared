@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-// protège les appels gRPC
+// protects gRPC calls
 func KeystoneAuthInterceptor(validator *KeystoneValidator) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,

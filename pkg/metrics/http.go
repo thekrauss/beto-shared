@@ -11,19 +11,19 @@ type responseRecorder struct {
 	statusCode int
 }
 
-// enregistre les métriques HTTP
+// records HTTP metrics
 func HTTPMetricsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
-		// wrapper  capture le code status
+		// wrapper captures the status code
 		rr := &responseRecorder{ResponseWriter: w, statusCode: http.StatusOK}
 
 		next.ServeHTTP(rr, r)
 
 		duration := time.Since(start).Seconds()
 
-		// met à jour métriques
+		//updates metrics
 		HTTPRequestsTotal.WithLabelValues(r.Method, r.URL.Path, strconv.Itoa(rr.statusCode)).Inc()
 		HTTPRequestDuration.WithLabelValues(r.Method, r.URL.Path).Observe(duration)
 	})

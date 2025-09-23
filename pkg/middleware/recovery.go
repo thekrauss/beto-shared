@@ -7,7 +7,7 @@ import (
 	"github.com/thekrauss/beto-shared/pkg/errors"
 )
 
-// capture les panic et renvoie une erreur 500
+// captures panics and returns an error 500
 func RecoveryMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {

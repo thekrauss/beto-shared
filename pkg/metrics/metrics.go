@@ -41,7 +41,7 @@ var (
 	)
 )
 
-// RegisterCustomMetric permet à un service d’enregistrer ses propres métriques
+// allows a service to record its own metrics
 func RegisterCustomMetric(c prometheus.Collector) {
 	prometheus.MustRegister(c)
 }

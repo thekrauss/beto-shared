@@ -14,7 +14,7 @@ type CinderClient struct {
 	client *gophercloud.ServiceClient
 }
 
-// initialise un client Cinder (Block Storage)
+// client Cinder (Block Storage)
 func NewCinderClient(provider *gophercloud.ProviderClient, region string) (*CinderClient, error) {
 	client, err := openstack.NewBlockStorageV3(provider, gophercloud.EndpointOpts{
 		Region: region,
@@ -33,7 +33,6 @@ type Volume struct {
 	Status      string
 }
 
-// crée un volume
 func (c *CinderClient) CreateVolume(ctx context.Context, name string, sizeGB int, desc string) (*Volume, error) {
 	createOpts := volumes.CreateOpts{
 		Name:        name,
@@ -55,7 +54,6 @@ func (c *CinderClient) CreateVolume(ctx context.Context, name string, sizeGB int
 	}, nil
 }
 
-// liste les volumes
 func (c *CinderClient) ListVolumes(ctx context.Context) ([]Volume, error) {
 	allPages, err := volumes.List(c.client, volumes.ListOpts{}).AllPages()
 	if err != nil {
@@ -80,7 +78,6 @@ func (c *CinderClient) ListVolumes(ctx context.Context) ([]Volume, error) {
 	return result, nil
 }
 
-// supprime un volume
 func (c *CinderClient) DeleteVolume(ctx context.Context, id string) error {
 	res := volumes.Delete(c.client, id, volumes.DeleteOpts{})
 	if res.Err != nil {
@@ -89,7 +86,6 @@ func (c *CinderClient) DeleteVolume(ctx context.Context, id string) error {
 	return nil
 }
 
-// attache un volume à une VM
 func AttachVolume(ctx context.Context, computeClient *gophercloud.ServiceClient, serverID, volumeID, device string) error {
 	attachOpts := volumeattach.CreateOpts{
 		VolumeID: volumeID,
@@ -103,7 +99,6 @@ func AttachVolume(ctx context.Context, computeClient *gophercloud.ServiceClient,
 	return nil
 }
 
-// détache un volume d’une VM
 func DetachVolume(ctx context.Context, computeClient *gophercloud.ServiceClient, serverID, attachmentID string) error {
 	err := volumeattach.Delete(computeClient, serverID, attachmentID).ExtractErr()
 	if err != nil {

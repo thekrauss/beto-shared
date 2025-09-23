@@ -15,7 +15,7 @@ import (
 
 var tp *sdktrace.TracerProvider
 
-// initialise OpenTelemetry avec OTLP exporter (Jaeger/Tempo)
+// initializes OpenTelemetry with OTLP exporter (Jaeger/Tempo)
 func InitTracing(ctx context.Context, serviceName, endpoint string, sampleRatio float64) func() {
 	exporter, err := otlptracegrpc.New(ctx,
 		otlptracegrpc.WithEndpoint(endpoint),

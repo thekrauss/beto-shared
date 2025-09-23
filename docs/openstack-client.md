@@ -43,7 +43,7 @@ import "github.com/thekrauss/beto-shared/pkg/openstack-client"
 func AttachVolume(ctx context.Context, computeClient *gophercloud.ServiceClient, serverID, volumeID, device string) error
 ```
 
-attache un volume à une VM
+
 
 <a name="DetachVolume"></a>
 ## func DetachVolume
@@ -52,7 +52,7 @@ attache un volume à une VM
 func DetachVolume(ctx context.Context, computeClient *gophercloud.ServiceClient, serverID, attachmentID string) error
 ```
 
-détache un volume d’une VM
+
 
 <a name="NewIdentityClient"></a>
 ## func NewIdentityClient
@@ -105,7 +105,7 @@ type CinderClient struct {
 func NewCinderClient(provider *gophercloud.ProviderClient, region string) (*CinderClient, error)
 ```
 
-initialise un client Cinder \(Block Storage\)
+client Cinder \(Block Storage\)
 
 <a name="CinderClient.CreateVolume"></a>
 ### func \(\*CinderClient\) CreateVolume
@@ -114,7 +114,7 @@ initialise un client Cinder \(Block Storage\)
 func (c *CinderClient) CreateVolume(ctx context.Context, name string, sizeGB int, desc string) (*Volume, error)
 ```
 
-crée un volume
+
 
 <a name="CinderClient.DeleteVolume"></a>
 ### func \(\*CinderClient\) DeleteVolume
@@ -123,7 +123,7 @@ crée un volume
 func (c *CinderClient) DeleteVolume(ctx context.Context, id string) error
 ```
 
-supprime un volume
+
 
 <a name="CinderClient.ListVolumes"></a>
 ### func \(\*CinderClient\) ListVolumes
@@ -132,7 +132,7 @@ supprime un volume
 func (c *CinderClient) ListVolumes(ctx context.Context) ([]Volume, error)
 ```
 
-liste les volumes
+
 
 <a name="Network"></a>
 ## type Network
@@ -149,7 +149,7 @@ type Network struct {
 <a name="NeutronClient"></a>
 ## type NeutronClient
 
-Client Neutron
+
 
 ```go
 type NeutronClient struct {
@@ -164,7 +164,7 @@ type NeutronClient struct {
 func NewNeutronClient(provider *gophercloud.ProviderClient, region string) (*NeutronClient, error)
 ```
 
-initialise le client Neutron
+client Neutron
 
 <a name="NeutronClient.AllocateFloatingIP"></a>
 ### func \(\*NeutronClient\) AllocateFloatingIP
@@ -173,7 +173,7 @@ initialise le client Neutron
 func (c *NeutronClient) AllocateFloatingIP(ctx context.Context, networkID string) (string, error)
 ```
 
-réserve une IP flottante
+reserves a floating IP
 
 <a name="NeutronClient.AttachFloatingIP"></a>
 ### func \(\*NeutronClient\) AttachFloatingIP
@@ -182,7 +182,7 @@ réserve une IP flottante
 func (c *NeutronClient) AttachFloatingIP(ctx context.Context, floatingIPID, portID string) error
 ```
 
-associe une IP flottante à un port \(VM\)
+associates a floating IP with a port \(VM\)
 
 <a name="NeutronClient.CreateNetwork"></a>
 ### func \(\*NeutronClient\) CreateNetwork
@@ -191,7 +191,7 @@ associe une IP flottante à un port \(VM\)
 func (c *NeutronClient) CreateNetwork(ctx context.Context, name string) (*Network, error)
 ```
 
-crée un réseau
+
 
 <a name="NeutronClient.ListNetworks"></a>
 ### func \(\*NeutronClient\) ListNetworks
@@ -200,7 +200,7 @@ crée un réseau
 func (c *NeutronClient) ListNetworks(ctx context.Context) ([]Network, error)
 ```
 
-liste tous les réseaux
+
 
 <a name="NovaClient"></a>
 ## type NovaClient
@@ -220,7 +220,7 @@ type NovaClient struct {
 func NewNovaClient(provider *gophercloud.ProviderClient, region string) (*NovaClient, error)
 ```
 
-crée un client Nova basé sur ton Provider OpenStack
+
 
 <a name="NovaClient.CreateVM"></a>
 ### func \(\*NovaClient\) CreateVM
@@ -229,7 +229,7 @@ crée un client Nova basé sur ton Provider OpenStack
 func (c *NovaClient) CreateVM(ctx context.Context, name, imageRef, flavorRef string, networkID string) (*Server, error)
 ```
 
-crée une VM
+
 
 <a name="NovaClient.DeleteVM"></a>
 ### func \(\*NovaClient\) DeleteVM
@@ -238,7 +238,7 @@ crée une VM
 func (c *NovaClient) DeleteVM(ctx context.Context, id string) error
 ```
 
-supprime une VM
+
 
 <a name="NovaClient.ListVMs"></a>
 ### func \(\*NovaClient\) ListVMs
@@ -247,7 +247,7 @@ supprime une VM
 func (c *NovaClient) ListVMs(ctx context.Context) ([]Server, error)
 ```
 
-liste les VMs
+
 
 <a name="NovaClient.StartVM"></a>
 ### func \(\*NovaClient\) StartVM
@@ -256,7 +256,7 @@ liste les VMs
 func (c *NovaClient) StartVM(ctx context.Context, id string) error
 ```
 
-démarre une VM
+
 
 <a name="NovaClient.StopVM"></a>
 ### func \(\*NovaClient\) StopVM
@@ -265,7 +265,7 @@ démarre une VM
 func (c *NovaClient) StopVM(ctx context.Context, id string) error
 ```
 
-arrête une VM
+
 
 <a name="Server"></a>
 ## type Server

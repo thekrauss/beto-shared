@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// enregistre les métriques gRPC
+// records gRPC metrics
 func GRPCMetricsInterceptor() grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,

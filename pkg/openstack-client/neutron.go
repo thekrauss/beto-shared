@@ -10,12 +10,11 @@ import (
 	"github.com/thekrauss/beto-shared/pkg/errors"
 )
 
-// Client Neutron
 type NeutronClient struct {
 	client *gophercloud.ServiceClient
 }
 
-// initialise le client Neutron
+// client Neutron
 func NewNeutronClient(provider *gophercloud.ProviderClient, region string) (*NeutronClient, error) {
 	client, err := openstack.NewNetworkV2(provider, gophercloud.EndpointOpts{
 		Region: region,
@@ -32,7 +31,6 @@ type Network struct {
 	Name string
 }
 
-// crée un réseau
 func (c *NeutronClient) CreateNetwork(ctx context.Context, name string) (*Network, error) {
 	createOpts := networks.CreateOpts{
 		Name:         name,
@@ -47,7 +45,6 @@ func (c *NeutronClient) CreateNetwork(ctx context.Context, name string) (*Networ
 	return &Network{ID: n.ID, Name: n.Name}, nil
 }
 
-// liste tous les réseaux
 func (c *NeutronClient) ListNetworks(ctx context.Context) ([]Network, error) {
 	allPages, err := networks.List(c.client, networks.ListOpts{}).AllPages()
 	if err != nil {
@@ -68,7 +65,7 @@ func (c *NeutronClient) ListNetworks(ctx context.Context) ([]Network, error) {
 
 // Floating IPs
 
-// réserve une IP flottante
+// reserves a floating IP
 func (c *NeutronClient) AllocateFloatingIP(ctx context.Context, networkID string) (string, error) {
 	createOpts := floatingips.CreateOpts{
 		FloatingNetworkID: networkID,
@@ -82,7 +79,7 @@ func (c *NeutronClient) AllocateFloatingIP(ctx context.Context, networkID string
 	return fip.FloatingIP, nil
 }
 
-// associe une IP flottante à un port (VM)
+// associates a floating IP with a port (VM)
 func (c *NeutronClient) AttachFloatingIP(ctx context.Context, floatingIPID, portID string) error {
 	updateOpts := floatingips.UpdateOpts{
 		PortID: &portID,

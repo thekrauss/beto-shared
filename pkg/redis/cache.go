@@ -9,7 +9,7 @@ import (
 	"github.com/thekrauss/beto-shared/pkg/errors"
 )
 
-// stocke une string avec TTL
+// stores a thong with TTL
 func SetString(ctx context.Context, key string, value string, ttl time.Duration) error {
 	if err := Client.Set(ctx, key, value, ttl).Err(); err != nil {
 		return errors.Wrap(err, errors.CodeInternal, "failed to set string in Redis")
@@ -17,7 +17,7 @@ func SetString(ctx context.Context, key string, value string, ttl time.Duration)
 	return nil
 }
 
-// récupère une string
+// picks up a thong
 func GetString(ctx context.Context, key string) (string, error) {
 	val, err := Client.Get(ctx, key).Result()
 	if err == redis.Nil {
@@ -28,7 +28,7 @@ func GetString(ctx context.Context, key string) (string, error) {
 	return val, nil
 }
 
-// stocke une struct en JSON
+// stores a struct in JSON
 func SetJSON(ctx context.Context, key string, v interface{}, ttl time.Duration) error {
 	data, err := json.Marshal(v)
 	if err != nil {
@@ -37,7 +37,7 @@ func SetJSON(ctx context.Context, key string, v interface{}, ttl time.Duration) 
 	return SetString(ctx, key, string(data), ttl)
 }
 
-// récupère une struct depuis JSON
+// retrieves a struct from JSON
 func GetJSON(ctx context.Context, key string, v interface{}) error {
 	val, err := GetString(ctx, key)
 	if err != nil {
@@ -49,7 +49,7 @@ func GetJSON(ctx context.Context, key string, v interface{}) error {
 	return nil
 }
 
-// supprime une clé
+// deletes a key
 func Delete(ctx context.Context, key string) error {
 	if err := Client.Del(ctx, key).Err(); err != nil {
 		return errors.Wrap(err, errors.CodeInternal, "failed to delete key from Redis")

@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-// attrape les erreurs et renvoie un gRPC status unifié
+// catch errors and return a unified gRPC status
 func GRPCErrorInterceptor() grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,

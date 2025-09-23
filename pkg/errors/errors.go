@@ -8,7 +8,7 @@ import (
 type Error struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
-	Cause   error  `json:"-"` // erreur technique interne
+	Cause   error  `json:"-"` //internal technical error
 }
 
 func (e *Error) Error() string {
@@ -18,22 +18,22 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("[%s] %s", e.Code, e.Message)
 }
 
-// crée une nouvelle erreur simple
+// creates a new simple error
 func New(code string, message string) *Error {
 	return &Error{Code: code, Message: message}
 }
 
-// crée une nouvelle erreur avec message formaté
+// creates a new error with formatted message
 func Newf(code string, format string, args ...any) *Error {
 	return &Error{Code: code, Message: fmt.Sprintf(format, args...)}
 }
 
-// enrobe une erreur existante
+// coats an existing error
 func Wrap(cause error, code string, message string) *Error {
 	return &Error{Code: code, Message: message, Cause: cause}
 }
 
-// permet de comparer un code d’erreur
+// allows you to compare an error code
 func Is(err error, code string) bool {
 	var e *Error
 	if sterrors.As(err, &e) {
@@ -42,7 +42,7 @@ func Is(err error, code string) bool {
 	return false
 }
 
-// compatibilité avec errors.Is / errors.As
+// compatibility with errors.Is /errors.As
 func (e *Error) Unwrap() error {
 	return e.Cause
 }

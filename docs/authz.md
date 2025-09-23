@@ -26,7 +26,7 @@ import "github.com/thekrauss/beto-shared/pkg/authz"
 func KeystoneAuthInterceptor(validator *KeystoneValidator) grpc.UnaryServerInterceptor
 ```
 
-protège les appels gRPC
+protects gRPC calls
 
 <a name="KeystoneAuthMiddleware"></a>
 ## func KeystoneAuthMiddleware
@@ -35,7 +35,7 @@ protège les appels gRPC
 func KeystoneAuthMiddleware(validator *KeystoneValidator, next http.Handler) http.Handler
 ```
 
-KeystoneAuthMiddleware protège une route HTTP
+protects an HTTP route
 
 <a name="RequireRole"></a>
 ## func RequireRole
@@ -44,7 +44,7 @@ KeystoneAuthMiddleware protège une route HTTP
 func RequireRole(ctx context.Context, role string) bool
 ```
 
-vérifie si l’utilisateur a un rôle donné
+collects claims from context
 
 <a name="WithClaims"></a>
 ## func WithClaims
@@ -53,7 +53,7 @@ vérifie si l’utilisateur a un rôle donné
 func WithClaims(ctx context.Context, c *Claims) context.Context
 ```
 
-injecte les claims dans le contexte
+injects claims into context
 
 <a name="Claims"></a>
 ## type Claims
@@ -77,7 +77,7 @@ type Claims struct {
 func GetClaims(ctx context.Context) (*Claims, bool)
 ```
 
-récupère les claims depuis le contexte
+
 
 <a name="KeystoneValidator"></a>
 ## type KeystoneValidator

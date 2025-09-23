@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// insère un nouvel enregistrement
+// inserts a new record
 func Create[T any](ctx context.Context, db *gorm.DB, entity *T) error {
 	if err := db.WithContext(ctx).Create(entity).Error; err != nil {
 		return errors.Wrap(err, errors.CodeDBError, "failed to create entity")
@@ -16,7 +16,7 @@ func Create[T any](ctx context.Context, db *gorm.DB, entity *T) error {
 	return nil
 }
 
-// récupère un enregistrement par ID
+// recovers a record by ID
 func FindByID[T any](ctx context.Context, db *gorm.DB, id any) (*T, error) {
 	var entity T
 	err := db.WithContext(ctx).First(&entity, "id = ?", id).Error
@@ -29,7 +29,7 @@ func FindByID[T any](ctx context.Context, db *gorm.DB, id any) (*T, error) {
 	return &entity, nil
 }
 
-// met à jour un enregistrement complet
+// updates a complete record
 func Update[T any](ctx context.Context, db *gorm.DB, entity *T) error {
 	if err := db.WithContext(ctx).Save(entity).Error; err != nil {
 		return errors.Wrap(err, errors.CodeDBError, "failed to update entity")
@@ -37,7 +37,7 @@ func Update[T any](ctx context.Context, db *gorm.DB, entity *T) error {
 	return nil
 }
 
-// met à jour certains champs
+// updates some fields
 func UpdateFields[T any](ctx context.Context, db *gorm.DB, id any, fields map[string]interface{}) error {
 	if err := db.WithContext(ctx).Model(new(T)).Where("id = ?", id).Updates(fields).Error; err != nil {
 		return errors.Wrap(err, errors.CodeDBError, "failed to update fields")
@@ -45,7 +45,6 @@ func UpdateFields[T any](ctx context.Context, db *gorm.DB, id any, fields map[st
 	return nil
 }
 
-// supprime un enregistrement
 func Delete[T any](ctx context.Context, db *gorm.DB, id any) error {
 	if err := db.WithContext(ctx).Delete(new(T), "id = ?", id).Error; err != nil {
 		return errors.Wrap(err, errors.CodeDBError, "failed to delete entity")
@@ -53,7 +52,7 @@ func Delete[T any](ctx context.Context, db *gorm.DB, id any) error {
 	return nil
 }
 
-// vérifie si un enregistrement existe
+// checks if a record exists
 func Exists[T any](ctx context.Context, db *gorm.DB, conditions map[string]interface{}) (bool, error) {
 	var count int64
 	if err := db.WithContext(ctx).Model(new(T)).Where(conditions).Count(&count).Error; err != nil {
@@ -62,7 +61,7 @@ func Exists[T any](ctx context.Context, db *gorm.DB, conditions map[string]inter
 	return count > 0, nil
 }
 
-// retourne le nombre d’enregistrements
+// returns the number of records
 func Count[T any](ctx context.Context, db *gorm.DB, conditions map[string]interface{}) (int64, error) {
 	var count int64
 	if err := db.WithContext(ctx).Model(new(T)).Where(conditions).Count(&count).Error; err != nil {
@@ -71,7 +70,7 @@ func Count[T any](ctx context.Context, db *gorm.DB, conditions map[string]interf
 	return count, nil
 }
 
-// retourne une liste paginée
+// returns a paginated list
 func FindAllPaginated[T any](ctx context.Context, db *gorm.DB, page, pageSize int, conditions map[string]interface{}) ([]T, int64, error) {
 	var results []T
 	var total int64
@@ -90,7 +89,7 @@ func FindAllPaginated[T any](ctx context.Context, db *gorm.DB, page, pageSize in
 	return results, total, nil
 }
 
-// recherche avec conditions dynamiques
+// search with dynamic conditions
 func FindByConditions[T any](ctx context.Context, db *gorm.DB, conditions map[string]interface{}) ([]T, error) {
 	var results []T
 	if err := db.WithContext(ctx).Model(new(T)).Where(conditions).Find(&results).Error; err != nil {
@@ -99,7 +98,7 @@ func FindByConditions[T any](ctx context.Context, db *gorm.DB, conditions map[st
 	return results, nil
 }
 
-// récupère ou crée si inexistant
+// recovers or creates if non-existent
 func FirstOrCreate[T any](ctx context.Context, db *gorm.DB, conds map[string]interface{}, defaults *T) (*T, error) {
 	var entity T
 	if err := db.WithContext(ctx).Where(conds).FirstOrCreate(&entity, defaults).Error; err != nil {
@@ -108,7 +107,7 @@ func FirstOrCreate[T any](ctx context.Context, db *gorm.DB, conds map[string]int
 	return &entity, nil
 }
 
-// exécute une fonction dans une transaction
+// executes a function in a transaction
 func Transaction(ctx context.Context, db *gorm.DB, fn func(tx *gorm.DB) error) error {
 	if err := db.WithContext(ctx).Transaction(fn); err != nil {
 		return errors.Wrap(err, errors.CodeDBError, "transaction failed")
@@ -116,7 +115,7 @@ func Transaction(ctx context.Context, db *gorm.DB, fn func(tx *gorm.DB) error) e
 	return nil
 }
 
-// affiche la requête SQL générée (for dev)
+// displays the generated SQL query (for dev)
 func DebugSQL(db *gorm.DB) {
 	sql := db.Dialector.Explain(db.Statement.SQL.String(), db.Statement.Vars...)
 	fmt.Println("SQL:", sql)

@@ -7,7 +7,6 @@ import (
 	"github.com/thekrauss/beto-shared/pkg/errors"
 )
 
-// définit les opérations communes à tout backend de stockage objet
 type ObjectStorageBackend interface {
 	CreateBucket(ctx context.Context, name string) error
 	ListObjects(ctx context.Context, bucket string) ([]string, error)
@@ -16,7 +15,7 @@ type ObjectStorageBackend interface {
 	DeleteObject(ctx context.Context, bucket, objectName string) error
 }
 
-// Config générique pour sélectionner le backend
+// Generic configuration to select the backend
 type Config struct {
 	Backend string // "swift" ou "minio"
 
@@ -31,7 +30,6 @@ type Config struct {
 	UseSSL    bool
 }
 
-// retourne une implémentation en fonction de la config
 func NewObjectStorage(cfg Config) (ObjectStorageBackend, error) {
 	switch cfg.Backend {
 	case "swift":
