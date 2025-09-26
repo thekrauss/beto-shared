@@ -6,7 +6,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 )
 
-// définit les infos nécessaires pour s’authentifier
 type AuthOptions struct {
 	IdentityEndpoint string
 	Username         string
@@ -15,7 +14,6 @@ type AuthOptions struct {
 	ProjectName      string
 }
 
-// crée un provider Keystone
 func NewIdentityClient(opts AuthOptions) (*gophercloud.ProviderClient, error) {
 	authOpts := gophercloud.AuthOptions{
 		IdentityEndpoint: opts.IdentityEndpoint,

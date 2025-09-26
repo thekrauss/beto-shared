@@ -120,3 +120,11 @@ func DebugSQL(db *gorm.DB) {
 	sql := db.Dialector.Explain(db.Statement.SQL.String(), db.Statement.Vars...)
 	fmt.Println("SQL:", sql)
 }
+
+func FindAll[T any](ctx context.Context, db *gorm.DB) ([]T, error) {
+	var results []T
+	if err := db.WithContext(ctx).Find(&results).Error; err != nil {
+		return nil, errors.Wrap(err, errors.CodeDBError, "failed to fetch all records")
+	}
+	return results, nil
+}

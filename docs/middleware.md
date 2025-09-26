@@ -11,10 +11,10 @@ import "github.com/thekrauss/beto-shared/pkg/middleware"
 - [func AuthMiddleware\(validator \*authz.KeystoneValidator\) func\(http.Handler\) http.Handler](<#AuthMiddleware>)
 - [func ErrorHandlerMiddleware\(next http.HandlerFunc\) http.HandlerFunc](<#ErrorHandlerMiddleware>)
 - [func GRPCErrorInterceptor\(\) grpc.UnaryServerInterceptor](<#GRPCErrorInterceptor>)
-- [func GRPCRateLimitInterceptor\(keyFunc func\(ctx context.Context, req interface\{\}\) string, limit int, window time.Duration\) grpc.UnaryServerInterceptor](<#GRPCRateLimitInterceptor>)
+- [func GRPCRateLimitInterceptor\(keyFunc func\(ctx context.Context, req interface\{\}\) string, cfg config.RateLimitConfig\) grpc.UnaryServerInterceptor](<#GRPCRateLimitInterceptor>)
 - [func GetRequestID\(ctx context.Context\) string](<#GetRequestID>)
 - [func LoggingMiddleware\(next http.Handler\) http.Handler](<#LoggingMiddleware>)
-- [func RateLimitMiddleware\(keyFunc func\(r \*http.Request\) string, limit int, window time.Duration\) func\(http.Handler\) http.Handler](<#RateLimitMiddleware>)
+- [func RateLimitMiddleware\(keyFunc func\(r \*http.Request\) string, cfg config.RateLimitConfig\) func\(http.Handler\) http.Handler](<#RateLimitMiddleware>)
 - [func RecoveryMiddleware\(next http.Handler\) http.Handler](<#RecoveryMiddleware>)
 - [func RequestIDMiddleware\(next http.Handler\) http.Handler](<#RequestIDMiddleware>)
 
@@ -50,7 +50,7 @@ catch errors and return a unified gRPC status
 ## func GRPCRateLimitInterceptor
 
 ```go
-func GRPCRateLimitInterceptor(keyFunc func(ctx context.Context, req interface{}) string, limit int, window time.Duration) grpc.UnaryServerInterceptor
+func GRPCRateLimitInterceptor(keyFunc func(ctx context.Context, req interface{}) string, cfg config.RateLimitConfig) grpc.UnaryServerInterceptor
 ```
 
 applies a rate limit distributed via Redis
@@ -77,7 +77,7 @@ logs each HTTP request with method, path, duration, status
 ## func RateLimitMiddleware
 
 ```go
-func RateLimitMiddleware(keyFunc func(r *http.Request) string, limit int, window time.Duration) func(http.Handler) http.Handler
+func RateLimitMiddleware(keyFunc func(r *http.Request) string, cfg config.RateLimitConfig) func(http.Handler) http.Handler
 ```
 
 limits HTTP requests per key

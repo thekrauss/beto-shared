@@ -50,3 +50,13 @@ rate_limits:
       enabled: true
       limit: 20
       window: 1m
+
+  social-service:
+    http:
+      enabled: true
+      limit: 200
+      window: 1m
+    grpc:
+      enabled: true
+      limit: 100
+      window: 1m
