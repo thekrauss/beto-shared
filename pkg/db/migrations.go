@@ -35,3 +35,17 @@ func RunMigrations(sqlDB *sql.DB, driver, migrationsPath string) error {
 
 	return nil
 }
+
+func RunMigrationsWithURL(databaseURL, migrationsPath string) error {
+	m, err := migrate.New(
+		"file://"+migrationsPath,
+		databaseURL,
+	)
+	if err != nil {
+		return errors.Wrap(err, errors.CodeDBError, "failed to init migrate instance")
+	}
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return errors.Wrap(err, errors.CodeDBError, "failed to run migrations")
+	}
+	return nil
+}
