@@ -1,8 +1,11 @@
 package metrics
 
 import (
+	"net/http"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
@@ -44,4 +47,8 @@ var (
 // allows a service to record its own metrics
 func RegisterCustomMetric(c prometheus.Collector) {
 	prometheus.MustRegister(c)
+}
+
+func MetricsHandler() http.Handler {
+	return promhttp.Handler()
 }
