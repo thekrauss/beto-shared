@@ -56,6 +56,13 @@ func (r *RabbitMQ) Publish(exchange, routingKey string, body []byte) error {
 	return nil
 }
 
+func (r *RabbitMQ) IsConnected() bool {
+	if r.conn == nil || r.conn.IsClosed() {
+		return false
+	}
+	return true
+}
+
 func (r *RabbitMQ) Close() {
 	if r.channel != nil {
 		_ = r.channel.Close()
