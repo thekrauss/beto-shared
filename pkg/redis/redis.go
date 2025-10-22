@@ -29,6 +29,21 @@ func Init(host string, port int, password string, db int) error {
 	return nil
 }
 
+func Ping(ctx context.Context) error {
+	if Client == nil {
+		return fmt.Errorf("redis client is not initialized")
+	}
+
+	status, err := Client.Ping(ctx).Result()
+	if err != nil {
+		return fmt.Errorf("redis ping failed: %w", err)
+	}
+	if status != "PONG" {
+		return fmt.Errorf("redis returned unexpected status: %s", status)
+	}
+	return nil
+}
+
 func Close() error {
 	if Client != nil {
 		return Client.Close()
