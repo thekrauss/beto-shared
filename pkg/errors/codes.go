@@ -18,6 +18,12 @@ const (
 	CodeDBConflict = "DB_CONFLICT"
 )
 
+const (
+	CodeCacheError    = "CACHE_ERROR"
+	CodeCacheNotFound = "CACHE_NOT_FOUND"
+	CodeCacheMiss     = "CACHE_MISS"
+)
+
 // Codes OpenStack - Keystone
 const (
 	CodeKeystoneAuthFailed   = "KEYSTONE_AUTH_FAILED"
